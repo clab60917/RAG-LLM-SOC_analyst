@@ -3,3 +3,9 @@
 - Readme file
 - model embedding for logs ?
 - maximum de lignes de logs ?
+
+----
+- multi documents
+- FAISS comme vector store ?
+- rich ?
+- couleurs ?

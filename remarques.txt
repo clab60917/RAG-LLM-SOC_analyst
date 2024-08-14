@@ -1,0 +1,5 @@
+- creer des stats (graphs)
+- Evaluer avec des tests
+- Readme file
+- model embedding for logs ?
+- maximum de lignes de logs ?

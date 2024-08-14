@@ -1,11 +1,13 @@
-- creer des stats (graphs)
-- Evaluer avec des tests
-- Readme file
-- model embedding for logs ?
-- maximum de lignes de logs ?
+- creer des stats (graphs) NOT FOR NOW
+- Evaluer avec des tests TO DO
+- Readme file OK
+- model embedding for logs ? TO DO
+- maximum de lignes de logs ? TO DO
 
 ----
-- multi documents
-- FAISS comme vector store ?
-- rich ?
-- couleurs ?
+- multi documents TO DO
+- FAISS comme vector store ? OK
+- rich ? OK
+- couleurs ? OK
+- switch from llama 3.1 to phi3 medium ? Mini ?
+- chunk size ?

@@ -3,11 +3,10 @@ from langchain.vectorstores import FAISS
 from langchain_ollama import OllamaEmbeddings
 from langchain import PromptTemplate
 from langchain.llms import Ollama
-from langchain.callbacks.manager import CallbackManager
-from langchain.callbacks.streaming_stdout import StreamingStdOutCallbackHandler
 from langchain.chains import RetrievalQA
-import sys
+from langchain.text_splitter import RecursiveCharacterTextSplitter  # <-- Import added here
 import os
+import sys
 from rich.console import Console
 from rich.prompt import Prompt
 from rich.panel import Panel
@@ -28,20 +27,49 @@ class SuppressStdout:
         sys.stdout = self._original_stdout
         sys.stderr = self._original_stderr
 
-# Load the logs and split them into chunks
-loader = TextLoader("./logs1.md")
-data = loader.load()
+def load_and_prepare_file(file_path):
+    # Load the selected log file and split it into chunks
+    loader = TextLoader(file_path)
+    data = loader.load()
 
-from langchain.text_splitter import RecursiveCharacterTextSplitter
-text_splitter = RecursiveCharacterTextSplitter(chunk_size=500, chunk_overlap=0)
-all_splits = text_splitter.split_documents(data)
+    text_splitter = RecursiveCharacterTextSplitter(chunk_size=500, chunk_overlap=0)
+    all_splits = text_splitter.split_documents(data)
 
-with SuppressStdout():
-    local_embeddings = OllamaEmbeddings(model="nomic-embed-text")
-    vectorstore = FAISS.from_documents(all_splits, local_embeddings)
+    with SuppressStdout():
+        local_embeddings = OllamaEmbeddings(model="nomic-embed-text")
+        vectorstore = FAISS.from_documents(all_splits, local_embeddings)
+
+    return vectorstore
+
+def select_file(directory):
+    files = [f for f in os.listdir(directory) if os.path.isfile(os.path.join(directory, f))]
+    if not files:
+        console.print("[bold red]No log files found in the directory.[/bold red]")
+        return None
+
+    console.print("[bold cyan]Available log files:[/bold cyan]")
+    for i, file in enumerate(files, start=1):
+        console.print(f"[bold green]{i}[/bold green]: {file}")
+
+    file_index = Prompt.ask("[bold green]Enter the number of the file you want to use:[/bold green]", choices=[str(i) for i in range(1, len(files) + 1)])
+    
+    selected_file = files[int(file_index) - 1]
+    return os.path.join(directory, selected_file)
+
+# Directory containing log files
+log_directory = "./logs"
 
 # Create a retrieval-based QA chain
 while True:
+    # Select the log file
+    selected_file_path = select_file(log_directory)
+    if not selected_file_path:
+        continue
+
+    # Prepare the selected file
+    vectorstore = load_and_prepare_file(selected_file_path)
+
+    # Ask for the query
     query = Prompt.ask("[bold green]Enter your query (or type 'exit' to quit):[/bold green]")
     if query.lower() == "exit":
         console.print("[bold red]Exiting...[/bold red]")
@@ -63,8 +91,8 @@ while True:
         template=template,
     )
 
-    # Initialize the LLM with callback for streaming output
-    llm = Ollama(model="llama3.1", callback_manager=CallbackManager([StreamingStdOutCallbackHandler()]))
+    # Initialize the LLM without the streaming output handler
+    llm = Ollama(model="llama3.1")
     qa_chain = RetrievalQA.from_chain_type(
         llm,
         retriever=vectorstore.as_retriever(),
@@ -75,8 +103,11 @@ while True:
     
     result = qa_chain({"query": query})
 
-    # Extract the LLM response from the result (assuming it's in a 'result' field)
-    response_text = result['result'] if isinstance(result, dict) else str(result)
+    # Assuming result is a dict and contains the response in the 'result' key
+    response_text = result.get('result', 'No result found.')
 
     # Display the result in a rich panel
     console.print(Panel(Text(response_text, style="bold white"), title="[bold cyan]Log Analysis Result[/bold cyan]"))
+
+    # Add a line break between questions
+    console.print()

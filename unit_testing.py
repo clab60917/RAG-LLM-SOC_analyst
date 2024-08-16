@@ -26,7 +26,7 @@ def load_and_prepare_file(file_path):
 def query_logs(vectorstore, query):
     template = """Use the following pieces of context to answer the question at the end.
     If you don't know the answer, just say that you don't know, don't try to make up an answer.
-    Use three sentences maximum and keep the answer as concise as possible.
+    Keep the answer precise and as concise as possible.
     {context}
     Question: {question}
     Helpful Answer:"""
@@ -36,7 +36,7 @@ def query_logs(vectorstore, query):
         template=template,
     )
 
-    llm = Ollama(model="llama3.1")
+    llm = Ollama(model="phi3:medium-128k")
     qa_chain = RetrievalQA.from_chain_type(
         llm,
         retriever=vectorstore.as_retriever(),
@@ -56,14 +56,10 @@ def query_and_validate(vectorstore, question: str, expected_response: str):
     evaluation_results_str = model.invoke(prompt)
     evaluation_results_str_cleaned = evaluation_results_str.strip().lower()
 
-    print(prompt)
-
     if "vrai" in evaluation_results_str_cleaned:
-        print("\033[92m" + f"Réponse: {evaluation_results_str_cleaned}" + "\033[0m")
-        return True
+        return True, response_text
     elif "faux" in evaluation_results_str_cleaned:
-        print("\033[91m" + f"Réponse: {evaluation_results_str_cleaned}" + "\033[0m")
-        return False
+        return False, response_text
     else:
         raise ValueError(
             f"Résultat d'évaluation invalide. Impossible de déterminer si 'vrai' ou 'faux'."
@@ -73,21 +69,36 @@ def run_tests(log_file_path):
     vectorstore = load_and_prepare_file(log_file_path)
 
     tests = [
-        ("Quelle est l'adresse IP la plus fréquemment mentionnée dans les logs ? (Répondez uniquement avec l'adresse IP)", "10.0.0.150"),
-        ("Combien d'erreurs 404 sont enregistrées dans les logs ? (Répondez uniquement avec le nombre)", "23"),
-        ("Combien de tentatives de connexion échouées y a-t-il eu ? (Répondez uniquement avec le nombre)", "12"),
-        ("Quel utilisateur a effectué le plus d'actions selon les logs ? (Répondez uniquement avec le nom d'utilisateur)", "admin"),
-        ("À quelle heure le trafic a-t-il atteint son pic ? (Répondez au format HH:00)", "15:00"),
-        ("Y a-t-il eu des tentatives d'injection SQL détectées ? (Répondez par Oui ou Non)", "Oui"),
+        ("Combien de tentatives de connexion ont échoué ?", "9"),
+        ("Combien d'attaques de force brute ont été détectées ?", "8"),
+        ("Combien de tentatives d'injection SQL ont été détectées ?", "5"),
+        ("Combien d'attaques DDoS ont été détectées ?", "5"),
+        ("Combien de tentatives de téléversement de fichiers suspects ont été détectées ?", "6"),
+        ("Quelle IP a tenté d'exécuter du code à distance ?", "192.168.1.100"),
+        ("Quelle IP a effectué la plupart des tentatives d'attaque ?", "203.0.113.1"),
     ]
+
+    passed_tests = 0
+    failed_tests = 0
 
     for question, expected_response in tests:
         print(f"\nTest: {question}")
-        result = query_and_validate(vectorstore, question, expected_response)
-        if result:
-            print("\033[92m" + "Test réussi!" + "\033[0m")
-        else:
-            print("\033[91m" + "Test échoué." + "\033[0m")
+        try:
+            result, actual_response = query_and_validate(vectorstore, question, expected_response)
+            if result:
+                passed_tests += 1
+                print("\033[92m" + "Test réussi!" + "\033[0m")
+            else:
+                failed_tests += 1
+                print("\033[91m" + f"Test échoué. Réponse attendue: {expected_response}, Réponse réelle: {actual_response}" + "\033[0m")
+        except Exception as e:
+            failed_tests += 1
+            print("\033[91m" + f"Erreur lors du test: {str(e)}" + "\033[0m")
+
+    print("\n" + "="*40)
+    print(f"\033[94mTotal des tests réussis: {passed_tests}\033[0m")
+    print(f"\033[94mTotal des tests échoués: {failed_tests}\033[0m")
+    print("="*40)
 
 if __name__ == "__main__":
     log_directory = "./logs"

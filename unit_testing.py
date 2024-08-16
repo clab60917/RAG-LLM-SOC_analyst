@@ -36,7 +36,7 @@ def query_logs(vectorstore, query):
         template=template,
     )
 
-    llm = Ollama(model="phi3:medium-128k")
+    llm = Ollama(model="llama3.1")
     qa_chain = RetrievalQA.from_chain_type(
         llm,
         retriever=vectorstore.as_retriever(),
@@ -52,7 +52,7 @@ def query_and_validate(vectorstore, question: str, expected_response: str):
         expected_response=expected_response, actual_response=response_text
     )
 
-    model = Ollama(model="llama3.1")
+    model = Ollama(model="mistral")
     evaluation_results_str = model.invoke(prompt)
     evaluation_results_str_cleaned = evaluation_results_str.strip().lower()
 

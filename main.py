@@ -4,7 +4,7 @@ from langchain_ollama import OllamaEmbeddings
 from langchain import PromptTemplate
 from langchain.llms import Ollama
 from langchain.chains import RetrievalQA
-from langchain.text_splitter import RecursiveCharacterTextSplitter  # <-- Import added here
+from langchain.text_splitter import RecursiveCharacterTextSplitter 
 import os
 import sys
 from rich.console import Console

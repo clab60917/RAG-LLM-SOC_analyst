@@ -14,7 +14,7 @@ This project explores the potential of using an LLM, combined with a retrieval s
 
 - **LangChain**: Utilized for orchestrating the retrieval-augmented generation (RAG) pipeline.
 - **Ollama LLM**: The LLM backbone, capable of understanding and processing natural language queries.
-- **Chroma**: A vector store for efficient retrieval of relevant log information.
+- **FAISS**: A vector store for efficient retrieval of relevant log information.
 - **Python**: The core language used for implementation.
 - **Pandas & Matplotlib** (Optional): For potential future extensions involving data analysis and visualization.
 

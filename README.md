@@ -29,10 +29,15 @@ This project explores the potential of using an LLM, combined with a retrieval s
 ## 📂 Project Structure
 
 ```
-├── logs1.md                     # Sample log data
+├── logs/                        # Directory containing log files for analysis
+│   ├── logs1.md                 # Sample log data file 1
+│   ├── logs2.md                 # Sample log data file 2
 ├── main.py                      # Main Python script implementing the POC
+├── unit_testing.py              # Script for unit testing of the POC
 ├── README.md                    # Project documentation (you are here!)
-└── requirements.txt             # Python dependencies
+├── requirements.txt             # Python dependencies
+└── LICENSE                      # License information for the project
+
 ```
 
 ## 🚀 Getting Started

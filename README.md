@@ -1,7 +1,6 @@
 # 🔍 SOC Analyst Level 1 Replacement using a RAG LLM 🚀
 
 Welcome to the **SOC Analyst Level 1 Replacement using RAG LLM** project! This repository presents a small research-oriented Proof of Concept (POC) aimed at exploring the feasibility of using a Retrieval-Augmented Generation (RAG) Large Language Model (LLM) to replace or assist a Level 1 SOC (Security Operations Center) Analyst.
-![RAG-LLM-SOC_Analyst](https://github.com/user-attachments/assets/71afd1d8-ce51-49ab-8b40-573b07c09161)
 <img src="https://github.com/user-attachments/assets/71afd1d8-ce51-49ab-8b40-573b07c09161" alt="description" width="400"/>
 
 ## 📜 Project Overview
